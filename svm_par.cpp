@@ -2613,9 +2613,10 @@ double svm_predict_values(const svm_model *model, const svm_node *x, double* dec
 		for(i=1;i<nr_class;i++)
 			start[i] = start[i-1]+model->nSV[i-1];
 
-		int *vote = Malloc(int,nr_class);
+		std::atomic<int> * vote = new std::atomic<int> [nr_class];
 		for(i=0;i<nr_class;i++)
 			vote[i] = 0;
+
 
 		typedef std::tuple<int,int,int> arg_t;
 
@@ -2669,7 +2670,8 @@ double svm_predict_values(const svm_model *model, const svm_node *x, double* dec
 
 		free(kvalue);
 		free(start);
-		free(vote);
+		// free(vote);
+		delete [] vote;
 		return model->label[vote_max_idx];
 	}
 }

@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <utility>
+#include <atomic>
 #include <vector>
 #include <iostream>
 
