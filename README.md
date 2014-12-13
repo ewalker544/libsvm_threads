@@ -11,7 +11,7 @@ Modify the CXX macro in the Makefile to refer to a C++11 compiler. Then,
 
     make clean
 	make
-	./svm-train_par -h
+	./svm-train-par -h
 
 [1]: http://www.csie.ntu.edu.tw/~cjlin/libsvm/
 
