@@ -1,3 +1,9 @@
+/*
+ ** Copyright 2014 Edward Walker
+ **
+ ** Description: Interface to thread pool - used mainly for running parallel tasks
+ ** @author: Ed Walker
+ */
 #ifndef _SVM_THREADS_H_
 #define _SVM_THREADS_H_
 
@@ -26,6 +32,9 @@ class SvmThreads
 			delete thrd_pool;
 		}
 
+		/**
+		 * Given N iterations, returns the start iteration for thread ID tid.
+		 */
 		int start(int tid, int N) const
 		{
 			int C = total_num_cpus;
@@ -36,6 +45,9 @@ class SvmThreads
 			}
 		}
 
+		/**
+		 * Given N iterations, returns the end iteration for thread ID tid
+		 */
     	int end(int tid, int N) const
 	    {
 			int C = total_num_cpus;
@@ -46,6 +58,9 @@ class SvmThreads
 			}
 		}
 
+		/**
+		 * Runs function on each thread in the pool.  Returns when all task completes.
+		 */
 		void run_workers(std::function<void(int)> func)
 		{
 			std::mutex cv_m;
@@ -72,6 +87,9 @@ class SvmThreads
 			return;
 		}
 
+		/**
+		 * Runs an ensemble of tasks in the thread pool
+		 */
 		template <typename T>
 		void run_workers(std::vector<std::tuple<std::function<void(T)>, T>> &work_items)
 		{
@@ -103,13 +121,25 @@ class SvmThreads
 			return;
 		}
 
+		/**
+		 * Returns an instance of this class
+		 */
 		static SvmThreads * getInstance() {
+			/**
+			 * §6.7 [stmt.dcl] p4
+			 *
+			 * If control enters the declaration concurrently while the variable is being initialized, 
+			 * the concurrent execution shall wait for completion of the initialization.
+			 */
 			static SvmThreads * s_instance = new SvmThreads();
 			return s_instance;
 		}
 
 	private:
 
+		/**
+		 * Total number of CPUs on this computer
+		 */
 		int total_num_cpus;
 
     	ThreadPool *thrd_pool;

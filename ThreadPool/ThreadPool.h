@@ -1,5 +1,11 @@
-#ifndef _ED_THREAD_POOL_H_
-#define _ED_THREAD_POOL_H_
+/*
+ ** Copyright 2014 Edward Walker
+ **
+ ** Description: Thread Pool - this class maintains a persistent thread pool 
+ ** @author: Ed Walker
+ */
+#ifndef _THREAD_POOL_H_
+#define _THREAD_POOL_H_
 
 #include <thread>
 #include <mutex>
