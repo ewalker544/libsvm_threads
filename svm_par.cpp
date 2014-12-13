@@ -1350,7 +1350,7 @@ public:
 				int pstart = start + threads->start(tid, len-start);
 				int pend = start + threads->end(tid, len-start);
 
-				for(int j=pstart;j<pend;j++)
+				for(int j = pstart; j < pend; j++)
 					data[j] = (Qfloat)(y[i]*y[j]*(this->*kernel_function)(i,j));
 
 			};
@@ -1400,11 +1400,21 @@ public:
 	Qfloat *get_Q(int i, int len) const
 	{
 		Qfloat *data;
-		int start, j;
+		int start;
 		if((start = cache->get_data(i,&data,len)) < len)
 		{
-			for(j=start;j<len;j++)
-				data[j] = (Qfloat)(this->*kernel_function)(i,j);
+			SvmThreads * threads = SvmThreads::getInstance();
+
+			auto func = [&] (int tid) {
+
+				int pstart = start + threads->start(tid, len-start);
+				int pend = start + threads->end(tid, len-start);
+
+				for(int j = pstart; j < pend; j++)
+					data[j] = (Qfloat)(this->*kernel_function)(i,j);
+			};
+
+			threads->run_workers(func);
 		}
 		return data;
 	}
@@ -1469,8 +1479,18 @@ public:
 		int j, real_i = index[i];
 		if(cache->get_data(real_i,&data,l) < l)
 		{
-			for(j=0;j<l;j++)
-				data[j] = (Qfloat)(this->*kernel_function)(real_i,j);
+			SvmThreads * threads = SvmThreads::getInstance();
+
+			auto func = [&] (int tid) {
+
+				int pstart = threads->start(tid, l);
+				int pend = threads->end(tid, l);
+
+				for(int j = pstart; j < pend; j++)
+					data[j] = (Qfloat)(this->*kernel_function)(real_i,j);
+			};
+
+			threads->run_workers(func);
 		}
 
 		// reorder and copy
