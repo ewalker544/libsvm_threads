@@ -55,7 +55,9 @@ public:
 
 private:
 
-	// our workers 
+	/**
+	 * Thread pool workers 
+	 */
 	class Worker {
 	public:
 		Worker(ThreadPool &s) : pool(s) { }
@@ -91,17 +93,25 @@ private:
 
 	friend class Worker;
 
-	// need to keep track of threads so we can join them
+	/** 
+	 * Threads in the pool
+	 */
 	std::vector< std::thread > workers;
 
-	// task queue
+	/**
+	 *  Task queue
+	 */
 	std::queue< std::function<void()> > tasks;
 
-	// synchronization
+	/**
+	 *  Task queue synchronization
+	 */
 	std::mutex queue_lock;
 	std::condition_variable condition;
 
-	// stop criteria
+	/**
+	 *  Stop criteria
+	 */
 	bool stop;
 };
 
