@@ -23,7 +23,7 @@ svm-scale: svm-scale.c
 	$(CXX) $(CFLAGS) svm-scale.c -o svm-scale
 svm.o: svm.cpp svm.h
 	$(CXX) $(CFLAGS) -c svm.cpp
-svm_par.o: svm_par.cpp svm.h ThreadPool/SvmThreads.h
+svm_par.o: svm_par.cpp svm.h ThreadPool/SvmThreads.h ThreadPool/ThreadPool.h
 	$(CXX) $(CFLAGS) -c svm_par.cpp
 clean:
 	rm -f *~ svm.o svm_par.o svm-train svm-predict svm-scale libsvm.so.$(SHVER)
