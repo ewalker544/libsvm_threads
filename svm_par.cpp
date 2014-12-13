@@ -2592,14 +2592,13 @@ double svm_get_svr_probability(const svm_model *model)
 
 double svm_predict_values(const svm_model *model, const svm_node *x, double* dec_values)
 {
-	int i;
 	if(model->param.svm_type == ONE_CLASS ||
 	   model->param.svm_type == EPSILON_SVR ||
 	   model->param.svm_type == NU_SVR)
 	{
 		double *sv_coef = model->sv_coef[0];
 		double sum = 0;
-		for(i=0;i<model->l;i++)
+		for(int i=0;i<model->l;i++)
 			sum += sv_coef[i] * Kernel::k_function(x,model->SV[i],model->param);
 		sum -= model->rho[0];
 		*dec_values = sum;
@@ -2630,11 +2629,11 @@ double svm_predict_values(const svm_model *model, const svm_node *x, double* dec
 
 		int *start = Malloc(int,nr_class);
 		start[0] = 0;
-		for(i=1;i<nr_class;i++)
+		for(int i=1;i<nr_class;i++)
 			start[i] = start[i-1]+model->nSV[i-1];
 
 		std::atomic<int> * vote = new std::atomic<int> [nr_class];
-		for(i=0;i<nr_class;i++)
+		for(int i=0;i<nr_class;i++)
 			vote[i] = 0;
 
 
@@ -2684,13 +2683,12 @@ double svm_predict_values(const svm_model *model, const svm_node *x, double* dec
 		threads->run_workers(work_items);
 
 		int vote_max_idx = 0;
-		for(i=1;i<nr_class;i++)
+		for(int i=1;i<nr_class;i++)
 			if(vote[i] > vote[vote_max_idx])
 				vote_max_idx = i;
 
 		free(kvalue);
 		free(start);
-		// free(vote);
 		delete [] vote;
 		return model->label[vote_max_idx];
 	}
