@@ -91,7 +91,7 @@ class SvmThreads
 		 * Runs an ensemble of tasks in the thread pool
 		 */
 		template <typename T>
-		void run_workers(std::vector<std::tuple<std::function<void(T)>, T>> &work_items)
+		void run_workers(std::vector<std::pair<std::function<void(T)>, T>> &work_items)
 		{
 			std::mutex cv_m;
 			std::condition_variable cv;

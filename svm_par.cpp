@@ -2637,12 +2637,13 @@ double svm_predict_values(const svm_model *model, const svm_node *x, double* dec
 			vote[i] = 0;
 
 
-		typedef std::tuple<int,int,int> arg_t;
+		typedef std::pair<int,int> arg_t;
 
 		auto func2 = [&] (arg_t arg) {
 			int i = std::get<0>(arg);
 			int j = std::get<1>(arg);
-			int p = std::get<2>(arg);
+			//int p = std::get<2>(arg);
+			int p = (i * nr_class) + j - (i+1) - ((i*(i+1))/2);
 
 			double sum = 0;
 			int si = start[i];
@@ -2666,7 +2667,7 @@ double svm_predict_values(const svm_model *model, const svm_node *x, double* dec
 				++vote[j];
 		};
 
-		typedef std::tuple<std::function<void(arg_t)>, arg_t> work_item_t;
+		typedef std::pair<std::function<void(arg_t)>, arg_t> work_item_t;
 		std::vector<work_item_t> work_items;
 
 		int p = 0;
@@ -2674,8 +2675,8 @@ double svm_predict_values(const svm_model *model, const svm_node *x, double* dec
 		{
 			for(int j=i+1;j<nr_class;j++)
 			{
-				arg_t arg = std::make_tuple(i, j, p);
-				work_items.push_back(std::make_tuple(func2, arg));
+				arg_t arg = std::make_pair(i, j);
+				work_items.push_back(std::make_pair(func2, arg));
 				++p;
 			}
 		}
