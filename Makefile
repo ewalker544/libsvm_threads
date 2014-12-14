@@ -1,9 +1,9 @@
-CXX = icpc
+CXX = g++
 CFLAGS = -Wall -Wconversion -O3 -std=c++11
 SHVER = 2
 OS = $(shell uname)
 
-all: svm-train-par svm-train svm-predict svm-scale
+all: svm-train-par svm-train svm-predict svm-predict-par svm-scale
 
 lib: svm.o
 	if [ "$(OS)" = "Darwin" ]; then \
@@ -17,13 +17,15 @@ svm-predict: svm-predict.c svm.o
 	$(CXX) $(CFLAGS) svm-predict.c svm.o -o svm-predict -lm
 svm-train: svm-train.c svm.o
 	$(CXX) $(CFLAGS) svm-train.c svm.o -o svm-train -lm
+svm-predict-par: svm-predict.c svm_par.o
+	$(CXX) $(CFLAGS) svm-predict.c svm_par.o -o svm-predict-par -lm
 svm-train-par: svm-train.c svm_par.o
 	$(CXX) $(CFLAGS) svm-train.c svm_par.o -o svm-train-par -lm
 svm-scale: svm-scale.c
 	$(CXX) $(CFLAGS) svm-scale.c -o svm-scale
 svm.o: svm.cpp svm.h
 	$(CXX) $(CFLAGS) -c svm.cpp
-svm_par.o: svm_par.cpp svm.h ThreadPool/SvmThreads.h ThreadPool/ThreadPool.h
+svm_par.o: svm_par.cpp svm.h ThreadPool/SvmThreads.h ThreadPool/ThreadPool.h ThreadPool/CachePool.h
 	$(CXX) $(CFLAGS) -c svm_par.cpp
 clean:
-	rm -f *~ svm.o svm_par.o svm-train-par svm-train svm-predict svm-scale libsvm.so.$(SHVER)
+	rm -f *~ svm.o svm_par.o svm-train-par svm-predict-par svm-train svm-predict svm-scale libsvm.so.$(SHVER)
