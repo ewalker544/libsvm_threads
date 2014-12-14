@@ -9,6 +9,7 @@
 #include <locale.h>
 #include "svm.h"
 #include "ThreadPool/SvmThreads.h"
+#include "ThreadPool/CachePool.h"
 #include <iostream>
 
 int libsvm_version = LIBSVM_VERSION;
@@ -68,11 +69,11 @@ static void info(const char *fmt,...) {}
 // l is the number of total data items
 // size is the cache size limit in bytes
 //
-class Cache
+class Cache : public LRUCache
 {
 public:
 	Cache(int l,long int size);
-	~Cache();
+	virtual ~Cache();
 
 	// request data [0,len)
 	// return some position p where [p,len) need to be filled
@@ -546,7 +547,8 @@ void Solver::Solve(int l, const QMatrix& Q, const double *p_, const schar *y_,
 			G[i] = p[i];
 			G_bar[i] = 0;
 		}
-		for(i=0;i<l;i++)
+		for(i=0;i<l;i++) 
+		{
 			if(!is_lower_bound(i))
 			{
 				const Qfloat *Q_i = Q.get_Q(i,l);
@@ -558,6 +560,7 @@ void Solver::Solve(int l, const QMatrix& Q, const double *p_, const schar *y_,
 					for(j=0;j<l;j++)
 						G_bar[j] += get_C(i) * Q_i[j];
 			}
+		}
 	}
 
 	// optimization step
@@ -1331,7 +1334,13 @@ public:
 	:Kernel(prob.l, prob.x, param)
 	{
 		clone(y,y_,prob.l);
-		cache = new Cache(prob.l,(long int)(param.cache_size*(1<<20)));
+
+		if (param.shrinking) {
+			cache = new Cache(prob.l,(long int)(param.cache_size*(1<<20)));
+		} else {
+			cache = new CachePool(prob.l,(long int)(param.cache_size*(1<<20)));
+		}
+
 		QD = new double[prob.l];
 		for(int i=0;i<prob.l;i++)
 			QD[i] = (this->*kernel_function)(i,i);
@@ -1381,7 +1390,7 @@ public:
 	}
 private:
 	schar *y;
-	Cache *cache;
+	LRUCache *cache;
 	double *QD;
 };
 
@@ -2642,7 +2651,6 @@ double svm_predict_values(const svm_model *model, const svm_node *x, double* dec
 		auto func2 = [&] (arg_t arg) {
 			int i = std::get<0>(arg);
 			int j = std::get<1>(arg);
-			//int p = std::get<2>(arg);
 			int p = (i * nr_class) + j - (i+1) - ((i*(i+1))/2);
 
 			double sum = 0;
