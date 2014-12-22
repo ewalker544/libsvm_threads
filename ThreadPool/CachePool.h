@@ -19,14 +19,24 @@ public:
 		head = (head_t *)calloc(l,sizeof(head_t));  // initialized to 0
 		size /= sizeof(Qfloat);
 		size -= l * sizeof(head_t) / sizeof(Qfloat);
+
+		size = (size / l) * l ; // size must be multiple of "l"
 		size = std::max(size, 2 * (long int) l); // cache must be large enough for two columns
+		size = std::min(size, (long int) l * l); // cache does not need to be larger than l * l
+
 		lru_head.next = lru_head.prev = &lru_head;
+
+		if (size % l != 0) {
+			std::cerr << "FATAL: cache pool size " << size  << " is not a multiple of " << l << std::endl;
+			exit(1);
+		}
 
 		pool = (Qfloat *)malloc(size *sizeof(Qfloat)); // pre-allocate block of memory
 		if (pool == NULL) {
 			std::cerr << "FATAL: cache pool unable to allocate " << size * sizeof(Qfloat) << " bytes\n";
 			exit(1);
 		}
+
 		std::cerr << "Cache pool allocated " << size * sizeof(Qfloat) << " bytes\n";
 		next_pos = 0;
 	}
